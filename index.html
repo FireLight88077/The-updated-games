@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unblocked Games Hub</title>
+    <style>
+        /* === GLOBAL STYLES === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Poppins", sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* === NAVBAR === */
+        nav {
+            background: #121212;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #00ffff;
+            letter-spacing: 1px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 30px;
+        }
+
+      nav ul li a {
+    position: relative;
+}
+
+nav ul li a::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background: #00ffff;
+    left: 0;
+    bottom: -3px;
+    transition: width 0.3s;
+}
+
+nav ul li a:hover::after {
+    width: 100%;
+}
+
+        /* === SEARCH BAR === */
+        .search-bar {
+            width: 100%;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .search-bar input {
+            width: 70%;
+            max-width: 500px;
+            padding: 10px 15px;
+            font-size: 1em;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+            background: #222;
+            color: #fff;
+        }
+
+        /* === GAME GRID === */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 25px;
+            padding: 0 40px 40px;
+        }
+
+        .game-card {
+            background: #181818;
+            border-radius: 12px;
+            overflow: hidden;
+            text-align: center;
+            padding: 10px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .game-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #00ffff44;
+        }
+
+        .game-card img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .game-card h3 {
+            font-size: 1em;
+            color: #eee;
+            margin-bottom: 5px;
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 600px) {
+            nav {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            nav ul {
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- === NAVBAR === -->
+    <nav>
+        <div class="logo">Unblocked Games</div>
+        <ul>
+            <li><a href="index.html">Games</a></li>
+            <li><a href="AI.html">AI</a></li>
+            <li><a href="Emulator.html">Emulator</a></li>
+            <li><a href="#">Coming Soon</a></li>
+            <li><a href="#">Coming Soon</a></li>
+        </ul>
+    </nav>
+
+    <!-- === SEARCH BAR === -->
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search for a game...">
+    </div>
+
+    <!-- === GAME GRID === -->
+    <div class="game-grid" id="gameGrid">
+        <!-- JS will load games here -->
+    </div>
+
+    <script>
+        // === GAME LIST ===
+        const games = [
+            "1v1.LoL.html",
+            "Angry Birds.html",
+            "Cluster Rush.html",
+            "Five Nights at Freddy.html",
+            "Five Nights at Freddy2.html",
+            "Five Nights at Freddy3.html",
+            "Five Nights at Freddy4.html",
+            "Five Nights at Freddy5.html",
+            "Five Nights at Freddy6.html",
+            "Friday Night Funkin.html",
+            "Half Life.html",
+            "Minecraft 1.21.4.html",
+            "Pizza Tower.html",
+            "Sonic the Hedgehog 2.html",
+            "amanda.html",
+            "baldi.html",
+            "bendy.html",
+            "blood.html",
+            "buckshot.html",
+            "cuphead.html",
+            "dash.html",
+            "getting-over-it.html",
+            "hollow.html",
+            "neighbor.html",
+            "people playground.html",
+            "repo.html",
+            "slope.html"
+        ];
+
+        const grid = document.getElementById("gameGrid");
+
+        // === Populate Grid ===
+        games.forEach(game => {
+            const card = document.createElement("a");
+            card.href = `games/${game}`; // <-- updated to point to /games folder
+            card.className = "game-card";
+
+            const img = document.createElement("img");
+            const thumbnail = `thumbnails/${game.replace('.html', '.png')}`;
+            img.src = thumbnail;
+            img.alt = game.replace('.html', '');
+
+            img.onerror = () => { img.style.display = "none"; }; // Hide missing previews
+
+            const title = document.createElement("h3");
+            title.textContent = game.replace(".html", "");
+
+            card.appendChild(img);
+            card.appendChild(title);
+            grid.appendChild(card);
+        });
+
+        // === Search Filter ===
+        document.getElementById("searchInput").addEventListener("input", function() {
+            const query = this.value.toLowerCase();
+            document.querySelectorAll(".game-card").forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(query) ? "block" : "none";
+            });
+        });
+    </script>
+</body>
+</html>
