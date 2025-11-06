@@ -18,39 +18,53 @@
         color: white;
         min-height: 100vh;
         display: flex;
-        flex-direction: column;
+        flex-direction: row; /* sidebar + main content */
     }
 
-    /* === NAVBAR === */
+    /* === NAVBAR (THINNER SIDE BAR) === */
     nav {
         background: #121212;
+        width: 120px; /* thinner sidebar */
+        min-height: 100vh;
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
         align-items: center;
-        padding: 15px 40px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
-        position: sticky;
-        top: 0;
-        z-index: 100;
+        padding: 20px 5px;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.6);
         transition: background 0.3s;
+        position: fixed;
+        top: 0;
+        left: 0;
     }
 
     nav .logo {
-        font-size: 1.5em;
+        font-size: 1.2em;
         font-weight: bold;
         color: #00ffff;
         letter-spacing: 1px;
+        margin-bottom: 30px;
+        text-align: center;
     }
 
     nav ul {
         list-style: none;
         display: flex;
-        gap: 30px;
+        flex-direction: column;
+        gap: 15px;
+        width: 100%;
+        align-items: center;
     }
 
     nav ul li a {
-        position: relative;
+        text-decoration: none;
+        color: white;
+        width: 100%;
+        text-align: center;
+        padding: 8px;
+        border-radius: 6px;
         cursor: pointer;
+        position: relative;
+        font-size: 0.9em;
     }
 
     nav ul li a::after {
@@ -60,7 +74,7 @@
         height: 2px;
         background: #00ffff;
         left: 0;
-        bottom: -3px;
+        bottom: 4px;
         transition: width 0.3s;
     }
 
@@ -68,11 +82,16 @@
         width: 100%;
     }
 
-    /* === SEARCH BAR === */
+    /* === MAIN CONTENT === */
+    .main-content {
+        margin-left: 120px; /* space for thinner sidebar */
+        padding: 20px 40px;
+        flex: 1;
+    }
+
     .search-bar {
-        width: 100%;
         text-align: center;
-        margin: 30px 0;
+        margin: 20px 0;
     }
 
     .search-bar input {
@@ -87,12 +106,10 @@
         color: #fff;
     }
 
-    /* === GAME GRID === */
     .game-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
         gap: 25px;
-        padding: 0 40px 40px;
     }
 
     .game-card {
@@ -123,21 +140,36 @@
         margin-bottom: 5px;
     }
 
-    /* === SETTINGS MODAL === */
+    /* === SETTINGS MODAL (SLIDE-IN) === */
+    #settingsOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 9998;
+        display: none;
+    }
+
     #settingsModal {
         position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        top: 0;
+        right: -350px; /* hidden initially */
+        width: 350px;
+        height: 100%;
         background: #121212;
-        border-radius: 12px;
-        padding: 30px;
-        z-index: 10000;
-        display: none;
+        z-index: 9999;
+        display: flex;
         flex-direction: column;
+        padding: 30px;
         gap: 15px;
-        box-shadow: 0 0 15px #00ffff66;
-        width: 300px;
+        box-shadow: -2px 0 15px #00ffff66;
+        transition: right 0.4s ease;
+    }
+
+    #settingsModal.open {
+        right: 0;
     }
 
     #settingsModal label {
@@ -171,55 +203,41 @@
         background: #00bbbb;
     }
 
-    #settingsOverlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        z-index: 9999;
-        display: none;
-    }
-
     /* === RESPONSIVE === */
-    @media (max-width: 600px) {
+    @media (max-width: 800px) {
         nav {
-            flex-direction: column;
-            gap: 10px;
-            text-align: center;
+            position: relative;
+            width: 100%;
+            height: auto;
+            flex-direction: row;
+            padding: 10px;
         }
-        nav ul {
-            gap: 15px;
-        }
-        .search-bar input {
-            width: 90%;
+        .main-content {
+            margin-left: 0;
         }
     }
 </style>
 </head>
 <body>
 
-    <!-- === NAVBAR === -->
+    <!-- === SIDEBAR NAV === -->
     <nav>
         <div class="logo">Unblocked Games</div>
         <ul>
             <li><a href="index.html">Games</a></li>
             <li><a href="AI.html">AI</a></li>
             <li><a href="Emulator.html">Emulator</a></li>
-            <li><a href="#">Coming Soon</a></li>
-            <li><a href="#">Coming Soon</a></li>
             <li><a onclick="openSettings()">Settings</a></li>
         </ul>
     </nav>
 
-    <!-- === SEARCH BAR === -->
-    <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="Search for a game...">
+    <!-- === MAIN CONTENT === -->
+    <div class="main-content">
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search for a game...">
+        </div>
+        <div class="game-grid" id="gameGrid"></div>
     </div>
-
-    <!-- === GAME GRID === -->
-    <div class="game-grid" id="gameGrid"></div>
 
     <!-- === SETTINGS MODAL === -->
     <div id="settingsOverlay" onclick="closeSettings()"></div>
@@ -234,7 +252,6 @@
     </div>
 
     <script>
-        // === GAME LIST ===
         const games = [
             "1v1.LoL.html","Angry Birds.html","Cluster Rush.html","Five Nights at Freddy.html",
             "Five Nights at Freddy2.html","Five Nights at Freddy3.html","Five Nights at Freddy4.html",
@@ -247,7 +264,7 @@
 
         const grid = document.getElementById("gameGrid");
 
-        // === Populate Grid ===
+        // Populate game grid
         games.forEach(game => {
             const card = document.createElement("a");
             card.href = `games/${encodeURIComponent(game)}`;
@@ -267,7 +284,7 @@
             grid.appendChild(card);
         });
 
-        // === Search Filter ===
+        // Search filter
         document.getElementById("searchInput").addEventListener("input", function() {
             const query = this.value.toLowerCase();
             document.querySelectorAll(".game-card").forEach(card => {
@@ -276,17 +293,17 @@
             });
         });
 
-        // === SETTINGS FUNCTIONS ===
+        // Settings modal
         const settingsModal = document.getElementById("settingsModal");
         const settingsOverlay = document.getElementById("settingsOverlay");
 
         function openSettings() {
-            settingsModal.style.display = "flex";
+            settingsModal.classList.add("open");
             settingsOverlay.style.display = "block";
         }
 
         function closeSettings() {
-            settingsModal.style.display = "none";
+            settingsModal.classList.remove("open");
             settingsOverlay.style.display = "none";
         }
 
@@ -294,13 +311,10 @@
             const newTitle = document.getElementById("siteTitleInput").value;
             const newBg = document.getElementById("bgColorInput").value;
 
-            if(newTitle) {
-                document.title = newTitle; // Change browser tab title
-            }
-
+            if(newTitle) document.title = newTitle;
             if(newBg) {
-                document.body.style.background = newBg; // Page background
-                document.querySelector("nav").style.background = newBg; // Navbar background
+                document.body.style.background = newBg;
+                document.querySelector("nav").style.background = newBg;
             }
 
             closeSettings();
