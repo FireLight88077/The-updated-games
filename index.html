@@ -1,277 +1,333 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="icon" href="images/controller.png" type="image/x-icon">3
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Unblocked Games Hub</title>
-<link rel="icon" href="images/controller.png" type="image/x-icon">
-
-<!-- Firebase SDK -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyC7Q8RyhRXIlaSuzD5Dx2HZFeV_sh20unU",
-  authDomain: "unblocked-b5c53.firebaseapp.com",
-  databaseURL: "https://unblocked-b5c53-default-rtdb.firebaseio.com",
-  projectId: "unblocked-b5c53",
-  storageBucket: "unblocked-b5c53.firebasestorage.app",
-  messagingSenderId: "594183365949",
-  appId: "1:594183365949:web:c6ac83cf9eaa4a56bd9154",
-  measurementId: "G-V4BCHPQ7KH"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-window.db = db;
-window.ref = ref;
-window.push = push;
-window.onValue = onValue;
-
-const navLogo = document.querySelector("nav .logo");
-const navElement = document.querySelector("nav");
-
-// --- SETTINGS (TEMPORARY) ---
-function loadSettings(){
-  navElement.style.background = "#121212";
-  document.body.style.background = "linear-gradient(135deg, #0a0a0a, #1a1a1a)";
-  navLogo.textContent = "Unblocked Games";
-  document.body.style.color = "#ffffff";
-  navLogo.style.color = "#00ffff";
-  document.querySelectorAll("nav ul li a").forEach(a=>a.style.color="#ffffff");
-  document.title = "Unblocked Games Hub";
-
-  // Fill modal inputs with default values
-  document.getElementById("navColorInput").value = "#121212";
-  document.getElementById("bgColorInput").value = "#0a0a0a";
-  document.getElementById("textColorInput").value = "#ffffff";
-  document.getElementById("siteTitleInput").value = "";
-  document.getElementById("logoTextInput").value = "";
-}
-
-window.addEventListener("DOMContentLoaded", loadSettings);
-
-const settingsModal = document.getElementById("settingsModal");
-const settingsOverlay = document.getElementById("settingsOverlay");
-
-window.openSettings = function(e){
-  e.preventDefault();
-  loadSettings();
-  settingsModal.classList.add("open");
-  settingsOverlay.style.display = "block";
-}
-
-window.closeSettings = function(){
-  settingsModal.classList.remove("open");
-  settingsOverlay.style.display = "none";
-}
-
-window.applySettings = function(){
-  const newTitle = document.getElementById("siteTitleInput").value;
-  const newBg = document.getElementById("bgColorInput").value;
-  const newNavColor = document.getElementById("navColorInput").value;
-  const newLogoText = document.getElementById("logoTextInput").value;
-  const newTextColor = document.getElementById("textColorInput").value;
-
-  if(newTitle) document.title = newTitle;
-  if(newBg) document.body.style.background = newBg;
-  if(newNavColor) navElement.style.background = newNavColor;
-  if(newLogoText) navLogo.textContent = newLogoText;
-  if(newTextColor){
-    document.body.style.color = newTextColor;
-    navLogo.style.color = newTextColor;
-    document.querySelectorAll("nav ul li a").forEach(a=>a.style.color=newTextColor);
-  }
-
-  window.closeSettings();
-}
-
-// --- CHAT MODAL ---
-const chatModal = document.getElementById("chatModal");
-const chatOverlay = document.getElementById("chatOverlay");
-const messagesDiv = document.getElementById("messages");
-const chatInput = document.getElementById("chatInput");
-const sendBtn = document.getElementById("sendBtn");
-
-let username = localStorage.getItem("chatUsername") || prompt("Enter your username") || "Anonymous";
-localStorage.setItem("chatUsername", username);
-
-window.openChat = function(e){
-  e.preventDefault();
-  chatModal.classList.add("open");
-  chatOverlay.style.display="block";
-}
-
-window.closeChat = function(){
-  chatModal.classList.remove("open");
-  chatOverlay.style.display="none";
-}
-
-sendBtn.onclick = () => {
-  const msg = chatInput.value.trim();
-  if(!msg) return;
-  push(ref(db,"chat"), { username, message: msg, timestamp: Date.now() });
-  chatInput.value = "";
-}
-
-chatInput.addEventListener("keypress", (e) => {
-  if(e.key==="Enter"){ sendBtn.click(); e.preventDefault(); }
-});
-
-onValue(ref(db,"chat"), snapshot => {
-  messagesDiv.innerHTML = "";
-  snapshot.forEach(child => {
-    const val = child.val();
-    const div = document.createElement("div");
-    div.textContent = `${val.username}: ${val.message}`;
-    messagesDiv.appendChild(div);
-  });
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-});
-
-// --- GAME GRID ---
-const mainContent = document.querySelector(".main-content");
-const games = [
-  "1v1.LoL.html","Angry Birds.html","Cluster Rush.html","Five Nights at Freddy.html",
-  "Five Nights at Freddy2.html","Five Nights at Freddy3.html","Five Nights at Freddy4.html",
-  "Five Nights at Freddy5.html","Five Nights at Freddy6.html","Five Nights at Freddy-UNC.html",
-  "Friday Night Funkin.html","Half Life.html","Minecraft 1.12.2.html","Pizza Tower.html",
-  "Sonic the Hedgehog 2.html","amanda.html","baldi.html","bendy.html","blood.html","buckshot.html",
-  "cuphead.html","dash.html","getting-over-it.html","hollow.html","neighbor.html","people playground.html",
-  "repo.html","slope.html","slope(3).html","Karlson.html","Soundboard.html","ULTRAKILL.html"
-];
-
-const grid = document.getElementById("gameGrid");
-games.forEach(game=>{
-  const card = document.createElement("a");
-  card.href = `games/${encodeURIComponent(game)}`;
-  card.className = "game-card";
-  card.target="_blank";
-  const img = document.createElement("img");
-  img.src = `thumbnails/${encodeURIComponent(game.replace(".html",".png"))}`;
-  img.alt = game.replace(".html","");
-  img.onerror=()=>{img.src="thumbnails/default.png";};
-  const title = document.createElement("h3");
-  title.textContent = game.replace(".html","");
-  card.appendChild(img); card.appendChild(title); grid.appendChild(card);
-});
-
-document.getElementById("searchInput").addEventListener("input",function(){
-  const query=this.value.toLowerCase();
-  document.querySelectorAll(".game-card").forEach(card=>{
-    card.style.display = card.textContent.toLowerCase().includes(query)?"block":"none";
-  });
-});
-
-window.loadPage = function(page,e){
-  e.preventDefault();
-  if(page==="Games"){ location.reload(); return; }
-  fetch(`pages/${page}.html`)
-    .then(res=>res.text())
-    .then(html=>{ mainContent.innerHTML=html; })
-    .catch(()=>{ mainContent.innerHTML="<h2 style='text-align:center'>Page not found</h2>"; });
-}
-</script>
-
 <style>
-* { margin:0; padding:0; box-sizing:border-box; font-family:"Poppins", sans-serif; }
-body { min-height:100vh; display:flex; flex-direction:row; color:white; background:linear-gradient(135deg, #0a0a0a, #1a1a1a); }
+    /* === GLOBAL STYLES === */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+    }
 
-/* SIDEBAR */
-nav { background:#121212; width:120px; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:20px 5px; box-shadow:2px 0 8px rgba(0,0,0,0.6); position:fixed; top:0; left:0; }
-nav .logo { font-size:1.2em; font-weight:bold; color:#00ffff; margin-bottom:30px; text-align:center; }
-nav ul { list-style:none; display:flex; flex-direction:column; gap:15px; width:100%; align-items:center; }
-nav ul li a { text-decoration:none; color:white; width:100%; text-align:center; padding:8px; border-radius:6px; cursor:pointer; position:relative; font-size:0.9em; }
-nav ul li a::after { content:""; position:absolute; width:0; height:2px; background:#00ffff; left:0; bottom:4px; transition:width 0.3s; }
-nav ul li a:hover::after { width:100%; }
+    body {
+        background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+        color: white;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: row; /* sidebar + main content */
+    }
 
-/* MAIN CONTENT */
-.main-content { margin-left:120px; padding:20px 40px; flex:1; }
-.search-bar { text-align:center; margin:20px 0; }
-.search-bar input { width:70%; max-width:500px; padding:10px 15px; font-size:1em; border-radius:8px; border:none; outline:none; background:#222; color:#fff; }
-.game-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:25px; }
-.game-card { background:#181818; border-radius:12px; overflow:hidden; text-align:center; padding:10px; transition:transform 0.2s ease, box-shadow 0.2s ease; }
-.game-card:hover { transform:scale(1.05); box-shadow:0 0 15px #00ffff44; }
-.game-card img { width:100%; height:100px; object-fit:cover; border-radius:10px; margin-bottom:8px; }
-.game-card h3 { font-size:1em; color:#eee; margin-bottom:5px; }
+    /* === NAVBAR (THINNER SIDE BAR) === */
+    nav {
+        background: #121212;
+        width: 120px; /* thinner sidebar */
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 5px;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.6);
+        transition: background 0.3s;
+        position: fixed;
+        top: 0;
+        left: 0;
+    }
 
-/* MODALS */
-.modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9998; display:none; }
-.modal { position:fixed; top:0; right:-500px; width:500px; height:100%; background:#121212; z-index:9999; display:flex; flex-direction:column; padding:30px; gap:15px; box-shadow:-2px 0 15px #00ffff66; transition:right 0.4s ease; }
-.modal.open { right:0; }
-.modal label { font-size:0.9em; margin-bottom:5px; display:block; }
-.modal input[type="text"], .modal input[type="color"] { width:100%; padding:8px; border-radius:6px; border:none; outline:none; font-size:1em; }
-.modal button { padding:10px; border:none; border-radius:8px; background:#00ffff; color:#121212; font-weight:bold; cursor:pointer; transition:background 0.3s; }
-.modal button:hover { background:#00bbbb; }
+    nav .logo {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #00ffff;
+        letter-spacing: 1px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
 
-/* CHAT MODAL */
-.chat-container { display:flex; flex-direction:column; height:85vh; max-width:100%; margin:auto; }
-.messages { flex:1; background:#181818; border-radius:10px; padding:10px; overflow-y:scroll; margin-bottom:10px; }
-.messages div { margin-bottom:5px; }
-#chatInput { padding:10px; border-radius:6px; border:none; outline:none; width:calc(100% - 60px); margin-right:10px; }
-#sendBtn { padding:10px; border:none; border-radius:6px; background:#00ffff; color:#121212; cursor:pointer; }
+    nav ul {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 100%;
+        align-items: center;
+    }
 
-@media (max-width:800px) { 
-  nav { position:relative; width:100%; height:auto; flex-direction:row; padding:10px; } 
-  .main-content { margin-left:0; } 
-}
+    nav ul li a {
+        text-decoration: none;
+        color: white;
+        width: 100%;
+        text-align: center;
+        padding: 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        position: relative;
+        font-size: 0.9em;
+    }
+
+    nav ul li a::after {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 2px;
+        background: #00ffff;
+        left: 0;
+        bottom: 4px;
+        transition: width 0.3s;
+    }
+
+    nav ul li a:hover::after {
+        width: 100%;
+    }
+
+    /* === MAIN CONTENT === */
+    .main-content {
+        margin-left: 120px; /* space for thinner sidebar */
+        padding: 20px 40px;
+        flex: 1;
+    }
+
+    .search-bar {
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    .search-bar input {
+        width: 70%;
+        max-width: 500px;
+        padding: 10px 15px;
+        font-size: 1em;
+        border-radius: 8px;
+        border: none;
+        outline: none;
+        background: #222;
+        color: #fff;
+    }
+
+    .game-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 25px;
+    }
+
+    .game-card {
+        background: #181818;
+        border-radius: 12px;
+        overflow: hidden;
+        text-align: center;
+        padding: 10px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .game-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px #00ffff44;
+    }
+
+    .game-card img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 8px;
+    }
+
+    .game-card h3 {
+        font-size: 1em;
+        color: #eee;
+        margin-bottom: 5px;
+    }
+
+    /* === SETTINGS MODAL (SLIDE-IN) === */
+    #settingsOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 9998;
+        display: none;
+    }
+
+    #settingsModal {
+        position: fixed;
+        top: 0;
+        right: -350px; /* hidden initially */
+        width: 350px;
+        height: 100%;
+        background: #121212;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        padding: 30px;
+        gap: 15px;
+        box-shadow: -2px 0 15px #00ffff66;
+        transition: right 0.4s ease;
+    }
+
+    #settingsModal.open {
+        right: 0;
+    }
+
+    #settingsModal label {
+        font-size: 0.9em;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    #settingsModal input[type="text"],
+    #settingsModal input[type="color"] {
+        width: 100%;
+        padding: 8px;
+        border-radius: 6px;
+        border: none;
+        outline: none;
+        font-size: 1em;
+    }
+
+    #settingsModal button {
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        background: #00ffff;
+        color: #121212;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    #settingsModal button:hover {
+        background: #00bbbb;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 800px) {
+        nav {
+            position: relative;
+            width: 100%;
+            height: auto;
+            flex-direction: row;
+            padding: 10px;
+        }
+        .main-content {
+            margin-left: 0;
+        }
+    }
 </style>
-
+</head>
 <body>
 
-<!-- SIDEBAR -->
-<nav>
-  <div class="logo">Unblocked Games</div>
-  <ul>
-    <li><a href="#" onclick="loadPage('Games',event)">Games</a></li>
-    <li><a href="#" onclick="loadPage('AI',event)">AI</a></li>
-    <li><a href="#" onclick="loadPage('Emulator',event)">Emulator</a></li>
-    <li><a href="#" onclick="openChat(event)">Chat</a></li>
-    <li><a href="#" onclick="openSettings(event)">Settings</a></li>
-  </ul>
-</nav>
+    <!-- === SIDEBAR NAV === -->
+    <nav>
+        <div class="logo">Unblocked Games</div>
+        <ul>
+            <li><a href="index.html">Games</a></li>
+            <li><a href="AI.html">AI</a></li>
+            <li><a href="Emulator.html">Emulator</a></li>
+            <li><a onclick="openSettings()">Settings</a></li>
+        </ul>
+    </nav>
 
-<!-- MAIN CONTENT -->
-<div class="main-content">
-  <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="Search for a game...">
-  </div>
-  <div class="game-grid" id="gameGrid"></div>
-</div>
+    <!-- === MAIN CONTENT === -->
+    <div class="main-content">
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search for a game...">
+        </div>
+        <div class="game-grid" id="gameGrid"></div>
+    </div>
 
-<!-- SETTINGS MODAL -->
-<div id="settingsOverlay" class="modal-overlay" onclick="closeSettings()"></div>
-<div id="settingsModal" class="modal">
-  <label for="siteTitleInput">Browser Tab Title:</label>
-  <input type="text" id="siteTitleInput">
+    <!-- === SETTINGS MODAL === -->
+    <div id="settingsOverlay" onclick="closeSettings()"></div>
+    <div id="settingsModal">
+        <label for="siteTitleInput">Browser Tab Title:</label>
+        <input type="text" id="siteTitleInput" placeholder="Enter new tab title">
 
-  <label for="logoTextInput">Site Name / Logo Text:</label>
-  <input type="text" id="logoTextInput">
+        <label for="bgColorInput">Background Color:</label>
+        <input type="color" id="bgColorInput">
 
-  <label for="bgColorInput">Background Color:</label>
-  <input type="color" id="bgColorInput">
+        <button onclick="applySettings()">Apply</button>
+    </div>
 
-  <label for="navColorInput">Nav Bar Color:</label>
-  <input type="color" id="navColorInput">
+    <script>
+const games = [
+    "1v1.LoL.html","Angry Birds.html","Cluster Rush.html","Five Nights at Freddy.html",
+    "Five Nights at Freddy2.html","Five Nights at Freddy3.html","Five Nights at Freddy4.html",
+    "Five Nights at Freddy5.html","Five Nights at Freddy6.html","Five Nights at Freddy-UNC.html",
+    "Friday Night Funkin.html","Half Life.html","Minecraft 1.12.2.html","Pizza Tower.html",
+    "Sonic the Hedgehog 2.html","amanda.html","baldi.html","bendy.html","blood.html","buckshot.html",
+    "cuphead.html","dash.html","getting-over-it.html","hollow.html","neighbor.html","people playground.html",
+    "repo.html","slope.html","slope(3).html","Karlson.html","Soundboard.html","ULTRAKILL.html","raft.html",
+    "Run 3.html","Granny.html","Granny 2.html","Human Expenditure Program.html","Andys Apple Farm.html",
+    "Deadseat.html","Kindergarden.html","Kindergarden 2.html","Kindergarden 3.html","Hypper Sandbox.html",
+    "Moto X3M.html","Minecraft 1.5.2.html","Plants vs Zombies.html","Sonic the Hedgehog 3_ Angel Island Remastered.html",
+    "Sonic CD.html","Subway Surfers_ London.html","Sonic Mania.html","Papa's Pizeria.html","Sonic.exe.html",
+    "BitLife.html","Bouncemasters.html","Geometry Dash Lite.html","Hill Climb Racing Lite.html",
+    "The man in the window.html","undertale yellow.html",
+];
 
-  <label for="textColorInput">Text Color:</label>
-  <input type="color" id="textColorInput">
 
-  <button onclick="applySettings()">Apply</button>
-</div>
+        const grid = document.getElementById("gameGrid");
 
-<!-- CHAT MODAL -->
-<div id="chatOverlay" class="modal-overlay" onclick="closeChat()"></div>
-<div id="chatModal" class="modal">
-  <h3 style="text-align:center; margin-bottom:15px;">Global Chat</h3>
-  <div class="chat-container">
-    <div id="messages" class="messages"></div>
-    <input type="text" id="chatInput" placeholder="Type a message...">
-    <button id="sendBtn">Send</button>
-  </div>
-</div>
+        // Populate game grid
+        games.forEach(game => {
+            const card = document.createElement("a");
+            card.href = `games/${encodeURIComponent(game)}`;
+            card.className = "game-card";
 
+            const img = document.createElement("img");
+            const thumbnail = `thumbnails/${encodeURIComponent(game.replace('.html', '.png'))}`;
+            img.src = thumbnail;
+            img.alt = game.replace('.html', '');
+            img.onerror = () => { img.src = "thumbnails/default.png"; };
+
+            const title = document.createElement("h3");
+            title.textContent = game.replace(".html", "");
+
+            card.appendChild(img);
+            card.appendChild(title);
+            grid.appendChild(card);
+        });
+
+        // Search filter
+        document.getElementById("searchInput").addEventListener("input", function() {
+            const query = this.value.toLowerCase();
+            document.querySelectorAll(".game-card").forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(query) ? "block" : "none";
+            });
+        });
+
+        // Settings modal
+        const settingsModal = document.getElementById("settingsModal");
+        const settingsOverlay = document.getElementById("settingsOverlay");
+
+        function openSettings() {
+            settingsModal.classList.add("open");
+            settingsOverlay.style.display = "block";
+        }
+
+        function closeSettings() {
+            settingsModal.classList.remove("open");
+            settingsOverlay.style.display = "none";
+        }
+
+        function applySettings() {
+            const newTitle = document.getElementById("siteTitleInput").value;
+            const newBg = document.getElementById("bgColorInput").value;
+
+            if(newTitle) document.title = newTitle;
+            if(newBg) {
+                document.body.style.background = newBg;
+                document.querySelector("nav").style.background = newBg;
+            }
+
+            closeSettings();
+        }
+    </script>
 </body>
 </html>
+
