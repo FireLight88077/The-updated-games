@@ -1,340 +1,177 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<link rel="icon" href="images/controller.png" type="image/x-icon">3
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Unblocked Games Hub</title>
+<link rel="icon" href="images/controller.png" type="image/x-icon">
 <style>
-    /* === GLOBAL STYLES === */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Poppins", sans-serif;
-    }
+* { margin:0; padding:0; box-sizing:border-box; font-family:"Poppins", sans-serif;}
+body { min-height:100vh; background:#0a0a0a; color:white; display:flex; transition: background 0.5s, color 0.5s;}
+body.light-mode { background:#fff; color:#121212; }
 
-    body {
-        background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
-        color: white;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: row; /* sidebar + main content */
-    }
+nav { background: #121212; width:120px; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:20px 5px; box-shadow:2px 0 8px rgba(0,0,0,0.6); transition: background 0.3s; position:fixed; top:0; left:0;}
+body.light-mode nav { background:#e0e0e0; }
+nav .logo { font-size:1.2em; font-weight:bold; color:#00ffff; letter-spacing:1px; margin-bottom:30px; text-align:center;}
+nav ul { list-style:none; display:flex; flex-direction:column; gap:15px; width:100%; align-items:center;}
+nav ul li a { text-decoration:none; color:white; width:100%; text-align:center; padding:8px; border-radius:6px; cursor:pointer; position:relative; font-size:0.9em; display:flex; flex-direction:column; align-items:center; transition: transform 0.2s;}
+nav ul li a i { font-size:1.5em; margin-bottom:4px; transition: color 0.3s; color:#fff; }
+body.light-mode nav ul li a i { color:#121212; }
+nav ul li a:hover { transform: scale(1.1); }
 
-    /* === NAVBAR (THINNER SIDE BAR) === */
-    nav {
-        background: #121212;
-        width: 120px; /* thinner sidebar */
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 20px 5px;
-        box-shadow: 2px 0 8px rgba(0,0,0,0.6);
-        transition: background 0.3s;
-        position: fixed;
-        top: 0;
-        left: 0;
-    }
+.main-content { margin-left:120px; padding:20px 40px; flex:1; transition: margin-left 0.3s;}
+.search-bar { text-align:center; margin:20px 0;}
+.search-bar input { width:70%; max-width:500px; padding:10px 15px; font-size:1em; border-radius:8px; border:none; outline:none; background:#222; color:#fff;}
+body.light-mode .search-bar input { background:#ddd; color:#121212; }
 
-    nav .logo {
-        font-size: 1.2em;
-        font-weight: bold;
-        color: #00ffff;
-        letter-spacing: 1px;
-        margin-bottom: 30px;
-        text-align: center;
-    }
+.game-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:25px;}
+.game-card {
+background:#181818; border-radius:12px; overflow:hidden; text-align:center; padding:10px; cursor:pointer; position:relative;
+height:150px; transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+body.light-mode .game-card { background:#f0f0f0; }
 
-    nav ul {
-        list-style: none;
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        width: 100%;
-        align-items: center;
-    }
+.game-card img {
+width:100%; height:100px; object-fit:cover; border-radius:10px; margin-bottom:8px; transition: all 0.3s ease; position:relative; z-index:1;
+}
+.game-card:hover img {
+position:absolute; top:-25px; left:0; width:100%; height:200px; object-fit:contain; z-index:10;
+box-shadow:0 8px 20px rgba(0,255,255,0.5); border-radius:12px;
+}
 
-    nav ul li a {
-        text-decoration: none;
-        color: white;
-        width: 100%;
-        text-align: center;
-        padding: 8px;
-        border-radius: 6px;
-        cursor: pointer;
-        position: relative;
-        font-size: 0.9em;
-    }
+.game-card h3 { font-size:1em; color:#eee; margin-bottom:5px;}
+body.light-mode .game-card h3 { color:#121212; }
 
-    nav ul li a::after {
-        content: "";
-        position: absolute;
-        width: 0;
-        height: 2px;
-        background: #00ffff;
-        left: 0;
-        bottom: 4px;
-        transition: width 0.3s;
-    }
+.favorites { display:flex; gap:15px; margin-bottom:20px; overflow-x:auto; padding-bottom:10px;}
+.favorites .game-card { min-width:120px; cursor:grab; flex-shrink:0;}
+.favorites .game-card.dragging { opacity:0.5;}
 
-    nav ul li a:hover::after {
-        width: 100%;
-    }
+#randomBtn { margin:10px auto; display:block; padding:10px 20px; background:#00ffff; color:#121212; font-weight:bold; border:none; border-radius:8px; cursor:pointer; transition:background 0.3s;}
+#randomBtn:hover { background:#00bbbb;}
 
-    /* === MAIN CONTENT === */
-    .main-content {
-        margin-left: 120px; /* space for thinner sidebar */
-        padding: 20px 40px;
-        flex: 1;
-    }
+#themeToggle { position:fixed; bottom:20px; left:20px; background:#00ffff; border:none; border-radius:50%; width:50px; height:50px; cursor:pointer; font-size:1.5em; color:#121212; display:flex; align-items:center; justify-content:center; transition: transform 0.3s;}
+#themeToggle:hover { transform:rotate(20deg); }
 
-    .search-bar {
-        text-align: center;
-        margin: 20px 0;
-    }
+@media (max-width:800px){ nav{position:relative;width:100%; height:auto; flex-direction:row; padding:10px;} .main-content{margin-left:0;}} </style>
 
-    .search-bar input {
-        width: 70%;
-        max-width: 500px;
-        padding: 10px 15px;
-        font-size: 1em;
-        border-radius: 8px;
-        border: none;
-        outline: none;
-        background: #222;
-        color: #fff;
-    }
-
-    .game-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 25px;
-    }
-
-    .game-card {
-        background: #181818;
-        border-radius: 12px;
-        overflow: hidden;
-        text-align: center;
-        padding: 10px;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .game-card:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 15px #00ffff44;
-    }
-
-    .game-card img {
-        width: 100%;
-        height: 100px;
-        object-fit: cover;
-        border-radius: 10px;
-        margin-bottom: 8px;
-    }
-
-    .game-card h3 {
-        font-size: 1em;
-        color: #eee;
-        margin-bottom: 5px;
-    }
-
-    /* === SETTINGS MODAL (SLIDE-IN) === */
-    #settingsOverlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        z-index: 9998;
-        display: none;
-    }
-
-    #settingsModal {
-        position: fixed;
-        top: 0;
-        right: -350px; /* hidden initially */
-        width: 350px;
-        height: 100%;
-        background: #121212;
-        z-index: 9999;
-        display: flex;
-        flex-direction: column;
-        padding: 30px;
-        gap: 15px;
-        box-shadow: -2px 0 15px #00ffff66;
-        transition: right 0.4s ease;
-    }
-
-    #settingsModal.open {
-        right: 0;
-    }
-
-    #settingsModal label {
-        font-size: 0.9em;
-        margin-bottom: 5px;
-        display: block;
-    }
-
-    #settingsModal input[type="text"],
-    #settingsModal input[type="color"] {
-        width: 100%;
-        padding: 8px;
-        border-radius: 6px;
-        border: none;
-        outline: none;
-        font-size: 1em;
-    }
-
-    #settingsModal button {
-        padding: 10px;
-        border: none;
-        border-radius: 8px;
-        background: #00ffff;
-        color: #121212;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background 0.3s;
-    }
-
-    #settingsModal button:hover {
-        background: #00bbbb;
-    }
-
-    /* === RESPONSIVE === */
-    @media (max-width: 800px) {
-        nav {
-            position: relative;
-            width: 100%;
-            height: auto;
-            flex-direction: row;
-            padding: 10px;
-        }
-        .main-content {
-            margin-left: 0;
-        }
-    }
-</style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
 </head>
 <body>
 
-    <!-- === SIDEBAR NAV === -->
-    <nav>
-        <div class="logo">Unblocked Games</div>
+<nav>
+<div class="logo">UG Hub</div>
 <ul>
-    <li><a href="index.html">Games</a></li>
-    <li><a href="AI.html">AI</a></li>
-    <li><a href="Emulator.html">Emulator</a></li>
-    <li><a onclick="openSettings()">Settings</a></li>
-    <li><a href="movies.html">Movies</a></li>
-    <li><a href="proxy.html">Proxy</a></li>
+<li><a href="index.html"><i class="fas fa-gamepad"></i>Games</a></li>
+<li><a href="AI.html"><i class="fas fa-robot"></i>AI</a></li>
+<li><a href="Emulator.html"><i class="fas fa-desktop"></i>Emu</a></li>
+<li><a onclick="openSettings()"><i class="fas fa-cog"></i>Settings</a></li>
+<li><a href="movies.html"><i class="fas fa-film"></i>Movies</a></li>
+<li><a href="proxy.html"><i class="fas fa-globe"></i>Proxy</a></li>
 </ul>
+</nav>
 
-    </nav>
+<div class="main-content">
+<button id="randomBtn">🎲 Random Game</button>
+<div class="favorites" id="favoritesRow"></div>
+<div class="search-bar">
+<input type="text" id="searchInput" placeholder="Search for a game...">
+</div>
+<div class="game-grid" id="gameGrid"></div>
+</div>
 
-    <!-- === MAIN CONTENT === -->
-    <div class="main-content">
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Search for a game...">
-        </div>
-        <div class="game-grid" id="gameGrid"></div>
-    </div>
+<div id="settingsOverlay" onclick="closeSettings()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9998;"></div>
+<div id="settingsModal" style="position:fixed; top:0; right:-350px; width:350px; height:100%; background:#121212; z-index:9999; display:flex; flex-direction:column; padding:30px; gap:15px; box-shadow:-2px 0 15px #00ffff66; transition:right 0.4s ease;">
+<label for="siteTitleInput">Browser Tab Title:</label>
+<input type="text" id="siteTitleInput" placeholder="Enter new tab title">
+<label for="bgColorInput">Background Color:</label>
+<input type="color" id="bgColorInput">
+<button onclick="applySettings()">Apply</button>
+</div>
 
-    <!-- === SETTINGS MODAL === -->
-    <div id="settingsOverlay" onclick="closeSettings()"></div>
-    <div id="settingsModal">
-        <label for="siteTitleInput">Browser Tab Title:</label>
-        <input type="text" id="siteTitleInput" placeholder="Enter new tab title">
-
-        <label for="bgColorInput">Background Color:</label>
-        <input type="color" id="bgColorInput">
-
-        <button onclick="applySettings()">Apply</button>
-    </div>
-
-    <script>
+<script>
 const games = [
-    "1v1.LoL.html","Angry Birds.html","Cluster Rush.html","Five Nights at Freddy.html",
-    "Five Nights at Freddy2.html","Five Nights at Freddy3.html","Five Nights at Freddy4.html",
-    "Five Nights at Freddy5.html","Five Nights at Freddy6.html","Five Nights at Freddy-UNC.html",
-    "Friday Night Funkin.html","Half Life.html","Minecraft 1.12.2.html","Pizza Tower.html",
-    "Sonic the Hedgehog 2.html","amanda.html","baldi.html","bendy.html","blood.html","buckshot.html",
-    "cuphead.html","dash.html","getting-over-it.html","hollow.html","neighbor.html","people playground.html",
-    "repo.html","slope.html","slope(3).html","Karlson.html","Soundboard.html","ULTRAKILL.html","raft.html",
-    "Run 3.html","Granny.html","Granny 2.html","Human Expenditure Program.html","Andys Apple Farm.html",
-    "Deadseat.html","Kindergarden.html","Kindergarden 2.html","Kindergarden 3.html","Hypper Sandbox.html",
-    "Moto X3M.html","Minecraft 1.5.2.html","Plants vs Zombies.html","Sonic the Hedgehog 3_ Angel Island Remastered.html",
-    "Sonic CD.html","Subway Surfers_ London.html","Sonic Mania.html","Papa's Pizeria.html","Sonic.exe.html",
-    "BitLife.html","Bouncemasters.html","Geometry Dash Lite.html","Hill Climb Racing Lite.html",
-    "The man in the window.html","undertale yellow.html","Deltarune 1-4.html",
+"1v1.LoL.html","Angry Birds.html","Cluster Rush.html","Five Nights at Freddy.html",
+"Five Nights at Freddy2.html","Five Nights at Freddy3.html","Five Nights at Freddy4.html",
+"Five Nights at Freddy5.html","Five Nights at Freddy6.html","Five Nights at Freddy-UNC.html",
+"Friday Night Funkin.html","Half Life.html","Minecraft 1.12.2.html","Pizza Tower.html",
+"Sonic the Hedgehog 2.html","Amanda.html","Baldi.html","Bendy.html","Blood.html","Buckshot.html",
+"Cuphead.html","Dash.html","Getting-over-it.html","Hollow.html","Neighbor.html","People Playground.html",
+"Repo.html","Slope.html","Slope(3).html","Karlson.html","Soundboard.html","ULTRAKILL.html","Raft.html",
+"Run 3.html","Granny.html","Granny 2.html","Human Expenditure Program.html","Andys Apple Farm.html",
+"Deadseat.html","Kindergarden.html","Kindergarden 2.html","Kindergarden 3.html","Hypper Sandbox.html",
+"Moto X3M.html","Minecraft 1.5.2.html","Plants vs Zombies.html","Sonic the Hedgehog 3_ Angel Island Remastered.html",
+"Sonic CD.html","Subway Surfers_ London.html","Sonic Mania.html","Papa's Pizeria.html","Sonic.exe.html",
+"BitLife.html","Bouncemasters.html","Geometry Dash Lite.html","Hill Climb Racing Lite.html",
+"The man in the window.html","Undertale yellow.html","Deltarune 1-4.html"
 ];
 
+const grid = document.getElementById("gameGrid");
+const favoritesRow = document.getElementById("favoritesRow");
 
-        const grid = document.getElementById("gameGrid");
+games.forEach(game=>{
+    const card = document.createElement("a");
+    card.href = `games/${encodeURIComponent(game)}`;
+    card.className="game-card";
 
-        // Populate game grid
-        games.forEach(game => {
-            const card = document.createElement("a");
-            card.href = `games/${encodeURIComponent(game)}`;
-            card.className = "game-card";
+    const img = document.createElement("img");
+    img.src=`thumbnails/${encodeURIComponent(game.replace('.html','.png'))}`;
+    img.alt=game.replace('.html','');
+    img.onerror=()=>{ img.src="thumbnails/default.png"; };
 
-            const img = document.createElement("img");
-            const thumbnail = `thumbnails/${encodeURIComponent(game.replace('.html', '.png'))}`;
-            img.src = thumbnail;
-            img.alt = game.replace('.html', '');
-            img.onerror = () => { img.src = "thumbnails/default.png"; };
+    const title=document.createElement("h3");
+    title.textContent=game.replace(".html","");
 
-            const title = document.createElement("h3");
-            title.textContent = game.replace(".html", "");
+    card.appendChild(img);
+    card.appendChild(title);
+    grid.appendChild(card);
 
-            card.appendChild(img);
-            card.appendChild(title);
-            grid.appendChild(card);
-        });
+    // Favorites
+    card.addEventListener('dblclick', ()=> {
+        const clone=card.cloneNode(true);
+        clone.addEventListener('dblclick', ()=> clone.remove());
+        favoritesRow.appendChild(clone);
+    });
+});
 
-        // Search filter
-        document.getElementById("searchInput").addEventListener("input", function() {
-            const query = this.value.toLowerCase();
-            document.querySelectorAll(".game-card").forEach(card => {
-                const text = card.textContent.toLowerCase();
-                card.style.display = text.includes(query) ? "block" : "none";
-            });
-        });
+// Search
+document.getElementById("searchInput").addEventListener("input", function(){
+    const query=this.value.toLowerCase();
+    document.querySelectorAll(".game-card").forEach(card=>{
+        const text=card.querySelector("h3").textContent.toLowerCase();
+        card.style.display=text.includes(query)?"block":"none";
+    });
+});
 
-        // Settings modal
-        const settingsModal = document.getElementById("settingsModal");
-        const settingsOverlay = document.getElementById("settingsOverlay");
+// Random game
+document.getElementById("randomBtn").addEventListener("click", ()=>{
+    const random=games[Math.floor(Math.random()*games.length)];
+    window.location.href=`games/${encodeURIComponent(random)}`;
+});
 
-        function openSettings() {
-            settingsModal.classList.add("open");
-            settingsOverlay.style.display = "block";
-        }
+// Settings
+const settingsModal=document.getElementById("settingsModal");
+const settingsOverlay=document.getElementById("settingsOverlay");
+function openSettings(){ settingsModal.style.right='0'; settingsOverlay.style.display='block';}
+function closeSettings(){ settingsModal.style.right='-350px'; settingsOverlay.style.display='none';}
+function applySettings(){
+    const newTitle=document.getElementById("siteTitleInput").value;
+    const newBg=document.getElementById("bgColorInput").value;
+    if(newTitle) document.title=newTitle;
+    if(newBg) document.body.style.background=newBg;
+    closeSettings();
+}
 
-        function closeSettings() {
-            settingsModal.classList.remove("open");
-            settingsOverlay.style.display = "none";
-        }
+// Theme toggle
+const toggleBtn=document.createElement('button');
+toggleBtn.id='themeToggle';
+toggleBtn.innerHTML='🌙';
+document.body.appendChild(toggleBtn);
+toggleBtn.addEventListener('click', ()=>{
+    document.body.classList.toggle('light-mode');
+    toggleBtn.innerHTML=document.body.classList.contains('light-mode')?'🌞':'🌙';
+});
+</script>
 
-        function applySettings() {
-            const newTitle = document.getElementById("siteTitleInput").value;
-            const newBg = document.getElementById("bgColorInput").value;
-
-            if(newTitle) document.title = newTitle;
-            if(newBg) {
-                document.body.style.background = newBg;
-                document.querySelector("nav").style.background = newBg;
-            }
-
-            closeSettings();
-        }
-    </script>
 </body>
 </html>
-
-
-
-
-
