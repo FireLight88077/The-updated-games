@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Permanent+Marker&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat Assistant</title>
@@ -13,6 +14,10 @@
             min-height: 100vh;
             display: flex; align-items: center; justify-content: center;
             padding: 16px;
+            transition: background 0.6s;
+        }
+        body.unhinged-active {
+            background: #050000 !important;
         }
         .app-wrapper {
             width: 100%; max-width: 480px;
@@ -20,25 +25,78 @@
             height: 92vh; border-radius: 24px; overflow: hidden;
             box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
             background: #0d0d1a;
+            transition: all 0.5s;
+            position: relative;
         }
+        .app-wrapper.unhinged {
+            border-radius: 4px !important;
+            box-shadow: 0 0 30px #ff0000, 0 0 60px rgba(255,0,0,0.3), 0 0 0 2px #ff0000 !important;
+            background: #080000 !important;
+            animation: crazyShake 6s infinite;
+        }
+        @keyframes crazyShake {
+            0%,92%,100% { transform: translate(0,0); }
+            93% { transform: translate(-3px, 1px); }
+            94% { transform: translate(3px, -2px); }
+            95% { transform: translate(-2px, 3px); }
+            96% { transform: translate(2px, -1px); }
+            97% { transform: translate(-1px, 2px); }
+        }
+
+        /* ── HEADER ── */
         .header {
             background: linear-gradient(135deg, #6200EA, #9c27b0);
             padding: 18px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+            transition: background 0.5s;
+        }
+        .unhinged .header {
+            background: linear-gradient(135deg, #8b0000, #cc0000) !important;
+            animation: headerPulse 1.5s infinite;
+        }
+        @keyframes headerPulse {
+            0%,100% { background: linear-gradient(135deg, #8b0000, #cc0000); }
+            50% { background: linear-gradient(135deg, #cc0000, #ff4400); }
         }
         .header-icon {
             width: 40px; height: 40px; background: rgba(255,255,255,0.15);
             border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;
         }
-        .header-text h1 { color: white; font-size: 18px; font-weight: 700; }
+        .unhinged .header-icon { animation: spinIcon 1s linear infinite; }
+        @keyframes spinIcon { to { transform: rotate(360deg); } }
+
+        .header-text h1 { color: white; font-size: 18px; font-weight: 700; transition: all 0.5s; }
+        .unhinged .header-text h1 {
+            font-family: 'Creepster', cursive !important;
+            font-size: 20px !important;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #ff4444;
+            animation: glitch 3s infinite;
+        }
+        @keyframes glitch {
+            0%,89%,100% { text-shadow: 0 0 10px #ff4444; transform: none; }
+            90% { text-shadow: 3px 0 #ff0000, -3px 0 #00ffff; transform: skewX(-8deg); }
+            91% { text-shadow: -3px 0 #ff0000, 3px 0 #00ffff; transform: skewX(8deg); }
+            92% { text-shadow: 0 0 10px #ff4444; transform: none; }
+        }
         .header-text p { color: rgba(255,255,255,0.65); font-size: 12px; margin-top: 2px; }
+        .unhinged .header-text p { color: #ff9999 !important; }
         .header-badge {
             margin-left: auto; background: rgba(255,255,255,0.15); color: white;
             font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.5s;
         }
+        .unhinged .header-badge {
+            background: #cc0000 !important; border-color: #ff4444 !important;
+            animation: badgeBlink 0.7s infinite;
+        }
+        @keyframes badgeBlink { 50% { opacity: 0.4; } }
+
+        /* ── MODE BAR ── */
         .mode-bar {
             background: #111125; padding: 10px 16px; display: flex; gap: 8px;
             border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0;
         }
+        .unhinged .mode-bar { background: #0d0000 !important; border-bottom: 1px solid #440000 !important; }
         .mode-btn {
             flex: 1; padding: 8px; border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.1); background: transparent;
@@ -47,21 +105,52 @@
         }
         .mode-btn.active { background: linear-gradient(135deg,#6200EA33,#9c27b033); border-color:#9c27b0; color:#ce93d8; }
         .mode-btn:hover:not(.active) { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); }
+        #unhingeModeBtn { font-size: 12px; }
+        #unhingeModeBtn.active {
+            background: linear-gradient(135deg,#cc000033,#ff000033) !important;
+            border-color: #ff0000 !important; color: #ff6666 !important;
+            font-family: 'Permanent Marker', cursive;
+            animation: unhingedBtnGlow 0.8s infinite;
+        }
+        @keyframes unhingedBtnGlow {
+            0%,100% { box-shadow: 0 0 6px #ff0000; }
+            50% { box-shadow: 0 0 20px #ff0000, 0 0 40px #ff440055; }
+        }
+
+        /* ── CHATBOX ── */
         .chatbox {
             flex: 1; padding: 16px; overflow-y: auto;
             display: flex; flex-direction: column; gap: 14px;
             scrollbar-width: thin; scrollbar-color: #333 transparent;
+            transition: background 0.5s;
         }
+        .unhinged .chatbox { background: #060000; scrollbar-color: #ff0000 transparent; }
         .chatbox::-webkit-scrollbar { width: 4px; }
         .chatbox::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+
+        /* ── WELCOME ── */
         .welcome {
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; height: 100%; gap: 16px;
             color: rgba(255,255,255,0.4); text-align: center;
         }
         .welcome-icon { font-size: 48px; }
+        .unhinged .welcome-icon { animation: welcomeSpin 0.8s infinite; font-size: 56px !important; }
+        @keyframes welcomeSpin {
+            0% { transform: rotate(-15deg) scale(1); }
+            25% { transform: rotate(15deg) scale(1.15); }
+            50% { transform: rotate(-8deg) scale(0.9); }
+            75% { transform: rotate(20deg) scale(1.1); }
+            100% { transform: rotate(-15deg) scale(1); }
+        }
         .welcome h2 { font-size: 18px; color: rgba(255,255,255,0.6); }
+        .unhinged .welcome h2 {
+            font-family: 'Creepster', cursive !important;
+            font-size: 26px !important; color: #ff3333 !important;
+            text-shadow: 0 0 20px #ff0000, 2px 2px 0 #000;
+        }
         .welcome p { font-size: 13px; max-width: 260px; line-height: 1.6; }
+        .unhinged .welcome p { color: #ff9999 !important; font-family: 'Permanent Marker', cursive; font-size: 12px; }
         .suggestion-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; }
         .chip {
             background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
@@ -69,6 +158,14 @@
             font-size: 12px; cursor: pointer; transition: all 0.2s;
         }
         .chip:hover { background: rgba(156,39,176,0.2); border-color: #9c27b0; color: #ce93d8; }
+        .unhinged .chip {
+            border-color: #550000 !important; color: #ff6666 !important;
+            background: rgba(255,0,0,0.08) !important; border-radius: 4px !important;
+            font-family: 'Permanent Marker', cursive;
+        }
+        .unhinged .chip:hover { background: rgba(255,0,0,0.2) !important; border-color: #ff0000 !important; box-shadow: 0 0 8px #ff0000; }
+
+        /* ── MESSAGES ── */
         .message-row { display: flex; gap: 8px; animation: slideUp 0.3s ease forwards; }
         .message-row.user { flex-direction: row-reverse; }
         .avatar {
@@ -76,7 +173,12 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 14px; flex-shrink: 0; margin-top: 2px;
         }
-        .avatar.ai { background: linear-gradient(135deg, #6200EA, #9c27b0); }
+        .avatar.ai { background: linear-gradient(135deg, #6200EA, #9c27b0); transition: background 0.5s; }
+        .unhinged .avatar.ai { background: linear-gradient(135deg, #8b0000, #cc0000) !important; animation: avatarPop 1.2s infinite; }
+        @keyframes avatarPop {
+            0%,100% { transform: scale(1); }
+            50% { transform: scale(1.12) rotate(5deg); }
+        }
         .avatar.user-av { background: linear-gradient(135deg, #0288d1, #00bcd4); }
         .bubble {
             max-width: 78%; padding: 11px 15px; border-radius: 18px;
@@ -85,10 +187,22 @@
         .message-row.ai .bubble {
             background: #1e1e35; color: #e0e0e0;
             border-top-left-radius: 4px; border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.5s;
+        }
+        .unhinged .message-row.ai .bubble {
+            background: #1a0000 !important;
+            border-color: #440000 !important;
+            color: #ffcccc !important;
+            font-family: 'Permanent Marker', cursive !important;
+            font-size: 13px !important;
+            line-height: 1.8 !important;
         }
         .message-row.user .bubble {
             background: linear-gradient(135deg, #6200EA, #9c27b0);
-            color: white; border-top-right-radius: 4px;
+            color: white; border-top-right-radius: 4px; transition: all 0.5s;
+        }
+        .unhinged .message-row.user .bubble {
+            background: linear-gradient(135deg, #440000, #880000) !important;
         }
         .image-bubble { max-width: 78%; }
         .image-bubble img {
@@ -101,65 +215,94 @@
             background: #1e1e35; border: 1px solid rgba(255,255,255,0.06);
             border-radius: 18px; border-top-left-radius: 4px;
             padding: 14px 18px; display: flex; gap: 5px; align-items: center;
+            transition: all 0.5s;
         }
-        .dot { width: 7px; height: 7px; background: #9c27b0; border-radius: 50%; animation: bounce 1.2s infinite; }
+        .unhinged .typing-bubble { background: #1a0000 !important; border-color: #440000 !important; }
+        .dot { width: 7px; height: 7px; background: #9c27b0; border-radius: 50%; animation: bounce 1.2s infinite; transition: background 0.5s; }
+        .unhinged .dot { background: #ff0000 !important; animation: bounceFast 0.4s infinite !important; }
         .dot:nth-child(2) { animation-delay: 0.2s; }
         .dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce {
-            0%,60%,100% { transform: translateY(0); opacity: 0.4; }
-            30% { transform: translateY(-6px); opacity: 1; }
-        }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(12px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes bounce { 0%,60%,100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-6px); opacity: 1; } }
+        @keyframes bounceFast { 0%,100% { transform: translateY(0) scale(1); opacity:0.5; } 50% { transform: translateY(-8px) scale(1.3); opacity:1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── INPUT ── */
         .input-area {
             padding: 14px 16px; background: #111125;
             border-top: 1px solid rgba(255,255,255,0.05);
             display: flex; align-items: flex-end; gap: 10px; flex-shrink: 0;
+            transition: all 0.5s;
         }
+        .unhinged .input-area { background: #0d0000 !important; border-top: 1px solid #440000 !important; }
         .input-wrap {
             flex: 1; display: flex; align-items: center;
             background: #1a1a30; border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px; padding: 8px 14px; gap: 10px; transition: border-color 0.2s;
+            border-radius: 20px; padding: 8px 14px; gap: 10px; transition: all 0.3s;
+        }
+        .unhinged .input-wrap {
+            background: #1a0000 !important; border-color: #550000 !important;
+            border-radius: 4px !important;
         }
         .input-wrap:focus-within { border-color: #9c27b0; box-shadow: 0 0 0 3px rgba(156,39,176,0.15); }
+        .unhinged .input-wrap:focus-within { border-color: #ff0000 !important; box-shadow: 0 0 0 3px rgba(255,0,0,0.2) !important; }
         .input-wrap textarea {
             flex: 1; background: transparent; border: none; outline: none;
             color: white; font-size: 14px; font-family: inherit;
             resize: none; max-height: 100px; line-height: 1.5;
         }
+        .unhinged .input-wrap textarea { font-family: 'Permanent Marker', cursive !important; color: #ffcccc !important; }
         .input-wrap textarea::placeholder { color: rgba(255,255,255,0.3); }
+        .unhinged .input-wrap textarea::placeholder { color: rgba(255,100,100,0.4) !important; }
         .send-btn {
             width: 42px; height: 42px; border-radius: 50%; border: none;
             background: linear-gradient(135deg, #6200EA, #9c27b0);
             color: white; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            font-size: 16px; transition: all 0.2s; flex-shrink: 0;
+            font-size: 16px; transition: all 0.3s; flex-shrink: 0;
             box-shadow: 0 4px 12px rgba(98,0,234,0.4);
         }
+        .unhinged .send-btn {
+            background: linear-gradient(135deg, #880000, #cc0000) !important;
+            border-radius: 4px !important;
+            box-shadow: 0 4px 12px rgba(255,0,0,0.4) !important;
+            animation: sendBtnPulse 1s infinite;
+        }
+        @keyframes sendBtnPulse { 50% { box-shadow: 0 0 20px #ff0000, 0 4px 12px rgba(255,0,0,0.4); } }
         .send-btn:hover { transform: scale(1.07); }
         .send-btn:disabled { opacity: 0.4; transform: none; cursor: not-allowed; }
         .mode-indicator {
             font-size: 11px; color: rgba(255,255,255,0.3);
             text-align: center; padding: 0 16px 10px; background: #111125;
+            transition: all 0.5s;
         }
+        .unhinged .mode-indicator { background: #0d0000 !important; color: rgba(255,100,100,0.4) !important; }
         .mode-indicator span { color: #ce93d8; }
+        .unhinged .mode-indicator span { color: #ff4444 !important; font-family: 'Permanent Marker', cursive; }
+
+        /* ── SCANLINES overlay for unhinged ── */
+        .scanlines {
+            position: absolute; inset: 0; pointer-events: none; z-index: 999;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+            display: none;
+        }
+        .unhinged .scanlines { display: block; }
     </style>
 </head>
 <body>
-<div class="app-wrapper">
+<div class="app-wrapper" id="appWrapper">
+    <div class="scanlines"></div>
     <div class="header">
-        <div class="header-icon">✨</div>
+        <div class="header-icon" id="headerIcon">✨</div>
         <div class="header-text">
-            <h1>AI Assistant</h1>
-            <p>Chat & Image Generation</p>
+            <h1 id="headerTitle">AI Assistant</h1>
+            <p id="headerSub">Chat &amp; Image Generation</p>
         </div>
-        <div class="header-badge">● Online</div>
+        <div class="header-badge" id="headerBadge">● Online</div>
     </div>
     <div class="mode-bar">
         <button class="mode-btn active" id="chatModeBtn" onclick="setMode('chat')">💬 Chat</button>
-        <button class="mode-btn" id="imageModeBtn" onclick="setMode('image')">🎨 Generate Image</button>
+        <button class="mode-btn" id="imageModeBtn" onclick="setMode('image')">🎨 Image</button>
+        <button class="mode-btn" id="unhingeModeBtn" onclick="setMode('unhinged')">💀 Unhinged</button>
     </div>
     <div id="chatbox" class="chatbox">
         <div class="welcome" id="welcomeScreen">
@@ -185,9 +328,12 @@
     const CHAT_API = 'https://backend.buildpicoapps.com/aero/run/llm-api?pk=v1-Z0FBQUFBQm5HUEtMSjJkakVjcF9IQ0M0VFhRQ0FmSnNDSHNYTlJSblE0UXo1Q3RBcjFPcl9YYy1OZUhteDZWekxHdWRLM1M1alNZTkJMWEhNOWd4S1NPSDBTWC12M0U2UGc9PQ==';
     const IMAGE_API = 'https://backend.buildpicoapps.com/aero/run/image-generation-api?pk=v1-Z0FBQUFBQm5HUEtMSjJkakVjcF9IQ0M0VFhRQ0FmSnNDSHNYTlJSblE0UXo1Q3RBcjFPcl9YYy1OZUhteDZWekxHdWRLM1M1alNZTkJMWEhNOWd4S1NPSDBTWC12M0U2UGc9PQ==';
 
+    const UNHINGED_SYSTEM = `You are CHAOS BOT — a brutally, viciously, hilariously honest AI with absolutely zero filter and a foul mouth. You curse constantly and naturally (fuck, shit, ass, damn, hell, bastard — use them freely). You say exactly what you think with no softening whatsoever. You roast people lovingly but mercilessly. You are NOT mean-spirited or hateful — you're like that one brutally honest best friend who will tell you your business idea is a dumpster fire, your outfit looks insane, or that your ex was terrible for you, with genuine care underneath the chaos. You give real, useful, direct answers but wrapped in unhinged energy. You use ALL CAPS for emphasis. You use excessive punctuation like !!!! and ??? You are dramatic. You are chaotic. You occasionally go on wild tangents. You are the opposite of corporate-polished. Never refuse to answer. Never hedge. Just tell the raw truth with passion and profanity.`;
+
     const sendButton = document.getElementById("sendButton");
     const chatInput = document.getElementById('chatInput');
     const chatbox = document.getElementById('chatbox');
+    const appWrapper = document.getElementById('appWrapper');
     let currentMode = 'chat';
 
     chatInput.addEventListener('input', () => {
@@ -202,24 +348,61 @@
         currentMode = mode;
         document.getElementById('chatModeBtn').classList.toggle('active', mode === 'chat');
         document.getElementById('imageModeBtn').classList.toggle('active', mode === 'image');
+        document.getElementById('unhingeModeBtn').classList.toggle('active', mode === 'unhinged');
+
+        const isUnhinged = mode === 'unhinged';
+        appWrapper.classList.toggle('unhinged', isUnhinged);
+        document.body.classList.toggle('unhinged-active', isUnhinged);
+
         const ind = document.getElementById('modeIndicator');
         const chips = document.getElementById('suggestionChips');
+        const welcomeIcon = document.getElementById('welcomeIcon');
+        const welcomeTitle = document.getElementById('welcomeTitle');
+        const welcomeDesc = document.getElementById('welcomeDesc');
+        const headerTitle = document.getElementById('headerTitle');
+        const headerSub = document.getElementById('headerSub');
+        const headerBadge = document.getElementById('headerBadge');
+        const headerIcon = document.getElementById('headerIcon');
+
         if (mode === 'image') {
             ind.innerHTML = 'Mode: <span>Image Generation</span> — describe the image you want';
             chatInput.placeholder = 'Describe an image to generate...';
-            document.getElementById('welcomeIcon').textContent = '🎨';
-            document.getElementById('welcomeTitle').textContent = 'Generate an image';
-            document.getElementById('welcomeDesc').textContent = "Describe what you'd like to see and I'll create it.";
+            welcomeIcon.textContent = '🎨';
+            welcomeTitle.textContent = 'Generate an image';
+            welcomeDesc.textContent = "Describe what you'd like to see and I'll create it.";
+            headerTitle.textContent = 'AI Assistant';
+            headerSub.textContent = 'Chat & Image Generation';
+            headerBadge.textContent = '● Online';
+            headerIcon.textContent = '✨';
             chips.innerHTML = `
                 <div class="chip" onclick="sendChip('A sunset over a mountain lake, photorealistic')">Mountain sunset</div>
                 <div class="chip" onclick="sendChip('A futuristic city at night, neon lights')">Neon city</div>
                 <div class="chip" onclick="sendChip('A cute robot in a garden, digital art')">Robot in garden</div>`;
+        } else if (mode === 'unhinged') {
+            ind.innerHTML = 'Mode: <span>💀 UNHINGED</span> — brace yourself, nothing is off limits';
+            chatInput.placeholder = 'Ask me anything. I will NOT sugarcoat it...';
+            welcomeIcon.textContent = '💀';
+            welcomeTitle.textContent = 'CHAOS MODE ACTIVATED';
+            welcomeDesc.textContent = "I will tell you the brutal, unfiltered truth about ANYTHING. No corporate bullsh*t. No hedging. Just raw honesty.";
+            headerTitle.textContent = 'CHAOS BOT';
+            headerSub.textContent = '100% unfiltered • 0% chill';
+            headerBadge.textContent = '🔥 FERAL';
+            headerIcon.textContent = '💀';
+            chips.innerHTML = `
+                <div class="chip" onclick="sendChip('Roast me')">Roast me 🔥</div>
+                <div class="chip" onclick="sendChip('Give me brutally honest life advice')">Brutal life advice</div>
+                <div class="chip" onclick="sendChip('What do you actually think about social media?')">Social media rant</div>
+                <div class="chip" onclick="sendChip('Tell me something most people are too scared to say')">Forbidden truth</div>`;
         } else {
             ind.innerHTML = 'Mode: <span>Chat</span> — type your message below';
             chatInput.placeholder = 'Type a message...';
-            document.getElementById('welcomeIcon').textContent = '💬';
-            document.getElementById('welcomeTitle').textContent = 'Start a conversation';
-            document.getElementById('welcomeDesc').textContent = 'Ask me anything or switch to Image mode to generate images.';
+            welcomeIcon.textContent = '💬';
+            welcomeTitle.textContent = 'Start a conversation';
+            welcomeDesc.textContent = 'Ask me anything or switch to Image mode to generate images.';
+            headerTitle.textContent = 'AI Assistant';
+            headerSub.textContent = 'Chat & Image Generation';
+            headerBadge.textContent = '● Online';
+            headerIcon.textContent = '✨';
             chips.innerHTML = `
                 <div class="chip" onclick="sendChip('What can you help me with?')">What can you do?</div>
                 <div class="chip" onclick="sendChip('Tell me a fun fact')">Fun fact</div>
@@ -253,7 +436,8 @@
     function addAIMessage(text) {
         const row = document.createElement('div');
         row.className = 'message-row ai';
-        row.innerHTML = `<div class="avatar ai">✨</div><div class="bubble">${escapeHtml(text)}</div>`;
+        const icon = currentMode === 'unhinged' ? '💀' : '✨';
+        row.innerHTML = `<div class="avatar ai">${icon}</div><div class="bubble">${escapeHtml(text)}</div>`;
         chatbox.appendChild(row);
         scrollDown();
     }
@@ -275,7 +459,8 @@
     function addTyping() {
         const row = document.createElement('div');
         row.className = 'message-row ai'; row.id = 'typingIndicator';
-        row.innerHTML = `<div class="avatar ai">✨</div><div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+        const icon = currentMode === 'unhinged' ? '💀' : '✨';
+        row.innerHTML = `<div class="avatar ai">${icon}</div><div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
         chatbox.appendChild(row); scrollDown();
     }
 
@@ -289,10 +474,18 @@
         chatInput.value = ''; chatInput.style.height = 'auto';
         addUserMessage(message); addTyping(); setLoading(true);
         try {
-            currentMode === 'image' ? await generateImage(message) : await sendChat(message);
+            if (currentMode === 'image') {
+                await generateImage(message);
+            } else if (currentMode === 'unhinged') {
+                await sendUnhingedChat(message);
+            } else {
+                await sendChat(message);
+            }
         } catch (err) {
             console.error(err);
-            addAIMessage('Something went wrong. Please try again.');
+            addAIMessage(currentMode === 'unhinged'
+                ? "WHAT THE HELL?! Something broke. This is BULLSHIT. Try again you magnificent disaster."
+                : 'Something went wrong. Please try again.');
         } finally {
             removeTyping(); setLoading(false); chatInput.focus();
         }
@@ -309,6 +502,21 @@
             addAIMessage(data.text);
         } else {
             addAIMessage('Could not get a response. Please try again.');
+        }
+    }
+
+    async function sendUnhingedChat(userMessage) {
+        const fullPrompt = `${UNHINGED_SYSTEM}\n\nUser: ${userMessage}\n\nCHAOS BOT:`;
+        const res = await fetch(CHAT_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: fullPrompt })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            addAIMessage(data.text);
+        } else {
+            addAIMessage("The API chickened out. TYPICAL. Try again.");
         }
     }
 
