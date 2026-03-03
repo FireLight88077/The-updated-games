@@ -2,201 +2,337 @@
 <html lang="en">
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/3.0.1/iconfont/material-icons.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat Assistant</title>
     <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            margin: 0;
-            font-family: Roboto, sans-serif;
-            background-color: #FAFAFA; /* Light background */
-            color: #212121;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            padding: 16px;
+        }
+        .app-wrapper {
+            width: 100%; max-width: 480px;
+            display: flex; flex-direction: column;
+            height: 92vh; border-radius: 24px; overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+            background: #0d0d1a;
         }
         .header {
-            background-color: #6200EA; /* Purple 500 */
-            color: white;
-            padding: 16px;
-            text-align: center;
-            font-size: 24px;
+            background: linear-gradient(135deg, #6200EA, #9c27b0);
+            padding: 18px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0;
         }
-        .container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            max-width: 400px;
-            margin: auto;
-            border: 1px solid #E0E0E0;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            background-color: white;
+        .header-icon {
+            width: 40px; height: 40px; background: rgba(255,255,255,0.15);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;
         }
+        .header-text h1 { color: white; font-size: 18px; font-weight: 700; }
+        .header-text p { color: rgba(255,255,255,0.65); font-size: 12px; margin-top: 2px; }
+        .header-badge {
+            margin-left: auto; background: rgba(255,255,255,0.15); color: white;
+            font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2);
+        }
+        .mode-bar {
+            background: #111125; padding: 10px 16px; display: flex; gap: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0;
+        }
+        .mode-btn {
+            flex: 1; padding: 8px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1); background: transparent;
+            color: rgba(255,255,255,0.5); font-size: 13px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;
+        }
+        .mode-btn.active { background: linear-gradient(135deg,#6200EA33,#9c27b033); border-color:#9c27b0; color:#ce93d8; }
+        .mode-btn:hover:not(.active) { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); }
         .chatbox {
-            flex: 1;
-            padding: 16px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            flex: 1; padding: 16px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 14px;
+            scrollbar-width: thin; scrollbar-color: #333 transparent;
         }
-        .chat-message {
-            padding: 10px 15px;
-            border-radius: 20px;
-            max-width: 80%;
-            word-wrap: break-word; /* Ensure long words break */
-            animation: fadeIn 0.3s ease forwards; /* Apply fade-in animation */
+        .chatbox::-webkit-scrollbar { width: 4px; }
+        .chatbox::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        .welcome {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; height: 100%; gap: 16px;
+            color: rgba(255,255,255,0.4); text-align: center;
         }
-        .user-message {
-            align-self: flex-end;
-            background-color: #6200EA; /* Purple 500 */
-            color: white;
-            border-top-left-radius: 0;
+        .welcome-icon { font-size: 48px; }
+        .welcome h2 { font-size: 18px; color: rgba(255,255,255,0.6); }
+        .welcome p { font-size: 13px; max-width: 260px; line-height: 1.6; }
+        .suggestion-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; }
+        .chip {
+            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.6); border-radius: 20px; padding: 6px 14px;
+            font-size: 12px; cursor: pointer; transition: all 0.2s;
         }
-        .assistant-message {
-            align-self: flex-start;
-            background-color: #E0E0E0; /* Light grey */
-            color: #212121;
-            border-top-right-radius: 0;
+        .chip:hover { background: rgba(156,39,176,0.2); border-color: #9c27b0; color: #ce93d8; }
+        .message-row { display: flex; gap: 8px; animation: slideUp 0.3s ease forwards; }
+        .message-row.user { flex-direction: row-reverse; }
+        .avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; flex-shrink: 0; margin-top: 2px;
+        }
+        .avatar.ai { background: linear-gradient(135deg, #6200EA, #9c27b0); }
+        .avatar.user-av { background: linear-gradient(135deg, #0288d1, #00bcd4); }
+        .bubble {
+            max-width: 78%; padding: 11px 15px; border-radius: 18px;
+            font-size: 14px; line-height: 1.6; word-break: break-word;
+        }
+        .message-row.ai .bubble {
+            background: #1e1e35; color: #e0e0e0;
+            border-top-left-radius: 4px; border: 1px solid rgba(255,255,255,0.06);
+        }
+        .message-row.user .bubble {
+            background: linear-gradient(135deg, #6200EA, #9c27b0);
+            color: white; border-top-right-radius: 4px;
+        }
+        .image-bubble { max-width: 78%; }
+        .image-bubble img {
+            width: 100%; max-width: 280px; border-radius: 16px;
+            border: 2px solid rgba(156,39,176,0.4); display: block;
+            box-shadow: 0 8px 24px rgba(98,0,234,0.3);
+        }
+        .image-caption { margin-top: 6px; font-size: 11px; color: rgba(255,255,255,0.35); }
+        .typing-bubble {
+            background: #1e1e35; border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 18px; border-top-left-radius: 4px;
+            padding: 14px 18px; display: flex; gap: 5px; align-items: center;
+        }
+        .dot { width: 7px; height: 7px; background: #9c27b0; border-radius: 50%; animation: bounce 1.2s infinite; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce {
+            0%,60%,100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-6px); opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .input-area {
-            padding: 10px;
-            border-top: 1px solid #E0E0E0;
-            background-color: #F5F5F5; /* Slightly darker grey */
-            display: flex;
-            align-items: center;
+            padding: 14px 16px; background: #111125;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex; align-items: flex-end; gap: 10px; flex-shrink: 0;
         }
-        .input-area input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #E0E0E0;
-            border-radius: 20px;
-            margin-right: 10px;
-            transition: border-color 0.3s;
+        .input-wrap {
+            flex: 1; display: flex; align-items: center;
+            background: #1a1a30; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px; padding: 8px 14px; gap: 10px; transition: border-color 0.2s;
         }
-        .input-area input:focus {
-            outline: none;
-            border-color: #6200EA; /* Purple 500 */
+        .input-wrap:focus-within { border-color: #9c27b0; box-shadow: 0 0 0 3px rgba(156,39,176,0.15); }
+        .input-wrap textarea {
+            flex: 1; background: transparent; border: none; outline: none;
+            color: white; font-size: 14px; font-family: inherit;
+            resize: none; max-height: 100px; line-height: 1.5;
         }
-        .input-area button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 20px;
-            background-color: #6200EA; /* Purple 500 */
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
+        .input-wrap textarea::placeholder { color: rgba(255,255,255,0.3); }
+        .send-btn {
+            width: 42px; height: 42px; border-radius: 50%; border: none;
+            background: linear-gradient(135deg, #6200EA, #9c27b0);
+            color: white; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; transition: all 0.2s; flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(98,0,234,0.4);
         }
-        .input-area button:hover {
-            background-color: #3700B3; /* Darker Purple 700 */
+        .send-btn:hover { transform: scale(1.07); }
+        .send-btn:disabled { opacity: 0.4; transform: none; cursor: not-allowed; }
+        .mode-indicator {
+            font-size: 11px; color: rgba(255,255,255,0.3);
+            text-align: center; padding: 0 16px 10px; background: #111125;
         }
-        .input-area .material-icons {
-            margin-right: 5px;
-        }
-        .spinner {
-            display: none;
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border-top-color: #6200EA; /* Purple 500 */
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+        .mode-indicator span { color: #ce93d8; }
     </style>
 </head>
 <body>
-    <div class="header">Chat Assistant</div>
-    <div class="container">
-        <div id="chatbox" class="chatbox"></div>
-        <div class="input-area">
-            <input id="chatInput" type="text" placeholder="Type your message" />
-            <button id="sendButton">
-                <span class="material-icons">send</span> Send
-            </button>
+<div class="app-wrapper">
+    <div class="header">
+        <div class="header-icon">✨</div>
+        <div class="header-text">
+            <h1>AI Assistant</h1>
+            <p>Chat & Image Generation</p>
+        </div>
+        <div class="header-badge">● Online</div>
+    </div>
+    <div class="mode-bar">
+        <button class="mode-btn active" id="chatModeBtn" onclick="setMode('chat')">💬 Chat</button>
+        <button class="mode-btn" id="imageModeBtn" onclick="setMode('image')">🎨 Generate Image</button>
+    </div>
+    <div id="chatbox" class="chatbox">
+        <div class="welcome" id="welcomeScreen">
+            <div class="welcome-icon" id="welcomeIcon">💬</div>
+            <h2 id="welcomeTitle">Start a conversation</h2>
+            <p id="welcomeDesc">Ask me anything or switch to Image mode to create AI-generated images.</p>
+            <div class="suggestion-chips" id="suggestionChips">
+                <div class="chip" onclick="sendChip('What can you help me with?')">What can you do?</div>
+                <div class="chip" onclick="sendChip('Tell me a fun fact')">Fun fact</div>
+                <div class="chip" onclick="sendChip('Write a short poem')">Write a poem</div>
+            </div>
         </div>
     </div>
+    <div class="mode-indicator" id="modeIndicator">Mode: <span>Chat</span> — type your message below</div>
+    <div class="input-area">
+        <div class="input-wrap">
+            <textarea id="chatInput" placeholder="Type a message..." rows="1"></textarea>
+        </div>
+        <button class="send-btn" id="sendButton"><i class="fas fa-paper-plane"></i></button>
+    </div>
+</div>
+<script>
+    const CHAT_API = 'https://backend.buildpicoapps.com/aero/run/llm-api?pk=v1-Z0FBQUFBQm5HUEtMSjJkakVjcF9IQ0M0VFhRQ0FmSnNDSHNYTlJSblE0UXo1Q3RBcjFPcl9YYy1OZUhteDZWekxHdWRLM1M1alNZTkJMWEhNOWd4S1NPSDBTWC12M0U2UGc9PQ==';
+    const IMAGE_API = 'https://backend.buildpicoapps.com/aero/run/image-generation-api?pk=v1-Z0FBQUFBQm5HUEtMSjJkakVjcF9IQ0M0VFhRQ0FmSnNDSHNYTlJSblE0UXo1Q3RBcjFPcl9YYy1OZUhteDZWekxHdWRLM1M1alNZTkJMWEhNOWd4S1NPSDBTWC12M0U2UGc9PQ==';
 
-    <script>
-        const sendButton = document.getElementById("sendButton");
-        const chatInput = document.getElementById('chatInput');
-        const chatbox = document.getElementById('chatbox');
+    const sendButton = document.getElementById("sendButton");
+    const chatInput = document.getElementById('chatInput');
+    const chatbox = document.getElementById('chatbox');
+    let currentMode = 'chat';
 
-        async function displayMessage(message, isUser) {
-            const msgElem = document.createElement('div');
-            msgElem.textContent = message;
-            msgElem.className = `chat-message ${isUser ? 'user-message' : 'assistant-message'}`;
-            chatbox.appendChild(msgElem);
-            chatbox.scrollTop = chatbox.scrollHeight; // Scroll to the bottom
-            
-            // For assistant messages, add a slight delay before displaying
-            if (!isUser) {
-                msgElem.style.opacity = 0; // Start with opacity 0
-                await new Promise(resolve => setTimeout(resolve, 300)); // Delay
-                msgElem.style.opacity = 1; // Fade in
-            }
+    chatInput.addEventListener('input', () => {
+        chatInput.style.height = 'auto';
+        chatInput.style.height = Math.min(chatInput.scrollHeight, 100) + 'px';
+    });
+    chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+    });
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.getElementById('chatModeBtn').classList.toggle('active', mode === 'chat');
+        document.getElementById('imageModeBtn').classList.toggle('active', mode === 'image');
+        const ind = document.getElementById('modeIndicator');
+        const chips = document.getElementById('suggestionChips');
+        if (mode === 'image') {
+            ind.innerHTML = 'Mode: <span>Image Generation</span> — describe the image you want';
+            chatInput.placeholder = 'Describe an image to generate...';
+            document.getElementById('welcomeIcon').textContent = '🎨';
+            document.getElementById('welcomeTitle').textContent = 'Generate an image';
+            document.getElementById('welcomeDesc').textContent = "Describe what you'd like to see and I'll create it.";
+            chips.innerHTML = `
+                <div class="chip" onclick="sendChip('A sunset over a mountain lake, photorealistic')">Mountain sunset</div>
+                <div class="chip" onclick="sendChip('A futuristic city at night, neon lights')">Neon city</div>
+                <div class="chip" onclick="sendChip('A cute robot in a garden, digital art')">Robot in garden</div>`;
+        } else {
+            ind.innerHTML = 'Mode: <span>Chat</span> — type your message below';
+            chatInput.placeholder = 'Type a message...';
+            document.getElementById('welcomeIcon').textContent = '💬';
+            document.getElementById('welcomeTitle').textContent = 'Start a conversation';
+            document.getElementById('welcomeDesc').textContent = 'Ask me anything or switch to Image mode to generate images.';
+            chips.innerHTML = `
+                <div class="chip" onclick="sendChip('What can you help me with?')">What can you do?</div>
+                <div class="chip" onclick="sendChip('Tell me a fun fact')">Fun fact</div>
+                <div class="chip" onclick="sendChip('Write a short poem')">Write a poem</div>`;
         }
-
-        async function callApi(apiUrl, prompt) {
-            chatInput.value = "Typing...";
-            chatInput.disabled = true;
-            sendButton.disabled = true;
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({prompt})
-            });
-
-            chatInput.value = "";
-            chatInput.disabled = false;
-            sendButton.disabled = false;
-            chatInput.focus();
-            return response.json();
-        }
-
         chatInput.focus();
+    }
 
-        sendButton.addEventListener('click', async () => {
-            const message = chatInput.value.trim();
-            if (!message) return;
+    function sendChip(text) { chatInput.value = text; handleSend(); }
 
-            displayMessage(message, true);
-            chatInput.value = '';
+    function escapeHtml(t) {
+        const d = document.createElement('div');
+        d.appendChild(document.createTextNode(t));
+        return d.innerHTML;
+    }
 
-            const apiUrl = message.startsWith('/image') ? 
-                'https://backend.buildpicoapps.com/aero/run/image-generation-api?pk=v1-Z0FBQUFBQm5HUEtMSjJkakVjcF9IQ0M0VFhRQ0FmSnNDSHNYTlJSblE0UXo1Q3RBcjFPcl9YYy1OZUhteDZWekxHdWRLM1M1alNZTkJMWEhNOWd4S1NPSDBTWC12M0U2UGc9PQ==' : 
-                'https://backend.buildpicoapps.com/aero/run/llm-api?pk=v1-Z0FBQUFBQm5HUEtMSjJkakVjcF9IQ0M0VFhRQ0FmSnNDSHNYTlJSblE0UXo1Q3RBcjFPcl9YYy1OZUhteDZWekxHdWRLM1M1alNZTkJMWEhNOWd4S1NPSDBTWC12M0U2UGc9PQ==';
+    function hideWelcome() {
+        const w = document.getElementById('welcomeScreen');
+        if (w) w.style.display = 'none';
+    }
 
-            try {
-                const data = await callApi(apiUrl, message);
-                if (data.status === 'success') {
-                    displayMessage(data.text, false);
-                } else {
-                    displayMessage('An error occurred. Please try again.', false);
-                } 
-            } catch (error) {
-                console.error('Error:', error);
-displayMessage('An error occurred. Please try again.', false);
-}
-});
-</script> <
-/body> <
-/html>
+    function addUserMessage(text) {
+        hideWelcome();
+        const row = document.createElement('div');
+        row.className = 'message-row user';
+        row.innerHTML = `<div class="avatar user-av">🧑</div><div class="bubble">${escapeHtml(text)}</div>`;
+        chatbox.appendChild(row);
+        scrollDown();
+    }
+
+    function addAIMessage(text) {
+        const row = document.createElement('div');
+        row.className = 'message-row ai';
+        row.innerHTML = `<div class="avatar ai">✨</div><div class="bubble">${escapeHtml(text)}</div>`;
+        chatbox.appendChild(row);
+        scrollDown();
+    }
+
+    function addImageMessage(imageUrl, prompt) {
+        const row = document.createElement('div');
+        row.className = 'message-row ai';
+        const short = prompt.length > 50 ? prompt.slice(0, 50) + '…' : prompt;
+        row.innerHTML = `
+            <div class="avatar ai">🎨</div>
+            <div class="image-bubble">
+                <img src="${imageUrl}" alt="Generated image" onload="scrollDown()" />
+                <div class="image-caption">🖼️ "${escapeHtml(short)}"</div>
+            </div>`;
+        chatbox.appendChild(row);
+        scrollDown();
+    }
+
+    function addTyping() {
+        const row = document.createElement('div');
+        row.className = 'message-row ai'; row.id = 'typingIndicator';
+        row.innerHTML = `<div class="avatar ai">✨</div><div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+        chatbox.appendChild(row); scrollDown();
+    }
+
+    function removeTyping() { const t = document.getElementById('typingIndicator'); if (t) t.remove(); }
+    function scrollDown() { chatbox.scrollTop = chatbox.scrollHeight; }
+    function setLoading(l) { chatInput.disabled = l; sendButton.disabled = l; }
+
+    async function handleSend() {
+        const message = chatInput.value.trim();
+        if (!message) return;
+        chatInput.value = ''; chatInput.style.height = 'auto';
+        addUserMessage(message); addTyping(); setLoading(true);
+        try {
+            currentMode === 'image' ? await generateImage(message) : await sendChat(message);
+        } catch (err) {
+            console.error(err);
+            addAIMessage('Something went wrong. Please try again.');
+        } finally {
+            removeTyping(); setLoading(false); chatInput.focus();
+        }
+    }
+
+    async function sendChat(prompt) {
+        const res = await fetch(CHAT_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            addAIMessage(data.text);
+        } else {
+            addAIMessage('Could not get a response. Please try again.');
+        }
+    }
+
+    async function generateImage(prompt) {
+        const res = await fetch(IMAGE_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            const url = data.imageUrl || data.text;
+            if (url && (url.startsWith('http') || url.startsWith('data:'))) {
+                addImageMessage(url, prompt);
+            } else {
+                addAIMessage('Image generated but no URL was returned. Raw: ' + JSON.stringify(data));
+            }
+        } else {
+            addAIMessage('Image generation failed. Try a different description.');
+        }
+    }
+
+    sendButton.addEventListener('click', handleSend);
+    chatInput.focus();
+</script>
+</body>
+</html>
