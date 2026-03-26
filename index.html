@@ -96,25 +96,64 @@ body.light-mode .game-card h3 { color:#121212; }
 </div>
 
 <button id="chatToggle" onclick="toggleChat()"><i class="fas fa-comments"></i></button>
+
 <div id="chatContainer">
     <div class="chat-header" id="chatHeader">
         <span id="chatTitle">LIVE CHAT</span>
-        <div style="display: flex; gap: 10px; align-items: center;">
+        <div style="display: flex; gap: 8px; align-items: center;">
             <button id="voiceSwitch" onclick="switchMode()" style="background: #121212; color: #00ffff; border: 1px solid #00ffff; padding: 2px 8px; border-radius: 4px; font-size: 0.7em; cursor: pointer;">
                 <i class="fas fa-microphone"></i> Voice
             </button>
+            <i class="fas fa-sync-alt" style="cursor:pointer; font-size: 0.8em;" onclick="reloadFrames()" title="Fix Connection"></i>
             <i class="fas fa-times" style="cursor:pointer" onclick="toggleChat()"></i>
         </div>
     </div>
-    <iframe id="textFrame" src="https://www3.cbox.ws/box/?boxid=3553617&boxtag=DNoKe1" width="100%" height="100%" allowtransparency="yes" frameborder="0" scrolling="auto"></iframe>
-  <iframe id="voiceFrame" 
-    src="https://vdo.ninja/?room=DAGames_Global_Voice&view&autostart&label=PC_User" 
-    width="100%" 
-    height="100%" 
-    allow="microphone *; camera *; autoplay" 
-    frameborder="0" 
-    style="display:none;">
-</iframe>
+    
+    <iframe id="textFrame" src="https://www3.cbox.ws/box/?boxid=3553617&boxtag=DNoKe1" width="100%" height="100%" allowtransparency="yes" frameborder="0"></iframe>
+    
+    <iframe id="voiceFrame" 
+        src="https://vdo.ninja/?room=DAGames_Global_Voice&push&view&chat=1&fileshare=1&autostart&videodevice=0" 
+        width="100%" 
+        height="100%" 
+        allow="camera; microphone; display-capture; autoplay; clipboard-read; clipboard-write; fullscreen" 
+        frameborder="0" 
+        style="display:none;">
+    </iframe>
+</div>
+
+<script>
+  function reloadFrames() {
+    document.getElementById('textFrame').src = document.getElementById('textFrame').src;
+    document.getElementById('voiceFrame').src = document.getElementById('voiceFrame').src;
+  }
+
+  function toggleChat() {
+    const chat = document.getElementById('chatContainer');
+    chat.style.display = (chat.style.display === 'none' || chat.style.display === '') ? 'flex' : 'none';
+  }
+
+  function switchMode() {
+    const text = document.getElementById('textFrame');
+    const voice = document.getElementById('voiceFrame');
+    const btn = document.getElementById('voiceSwitch');
+    const title = document.getElementById('chatTitle');
+
+    if (text.style.display !== 'none') {
+      text.style.display = 'none';
+      voice.style.display = 'block';
+      btn.innerHTML = '<i class="fas fa-comment-alt"></i> Text';
+      title.innerText = 'VIDEO & FILES';
+    } else {
+      text.style.display = 'block';
+      voice.style.display = 'none';
+      btn.innerHTML = '<i class="fas fa-microphone"></i> Voice';
+      title.innerText = 'LIVE CHAT';
+    }
+  }
+
+  // Draggable Logic (Keep your existing dragElement function here)
+  dragElement(document.getElementById("chatContainer"));
+</script>
 </div>
 
 <div id="settingsOverlay" onclick="closeSettings()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9998;"></div>
