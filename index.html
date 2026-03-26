@@ -104,7 +104,7 @@ body.light-mode .game-card h3 { color:#121212; }
             <button id="voiceSwitch" onclick="switchMode()" style="background: #121212; color: #00ffff; border: 1px solid #00ffff; padding: 2px 8px; border-radius: 4px; font-size: 0.7em; cursor: pointer;">
                 <i class="fas fa-microphone"></i> Voice
             </button>
-            <i class="fas fa-sync-alt" style="cursor:pointer; font-size: 0.8em;" onclick="reloadFrames()" title="Fix Connection"></i>
+            <i class="fas fa-sync-alt" style="cursor:pointer; font-size: 0.8em;" onclick="reloadFrames()"></i>
             <i class="fas fa-times" style="cursor:pointer" onclick="toggleChat()"></i>
         </div>
     </div>
@@ -112,16 +112,17 @@ body.light-mode .game-card h3 { color:#121212; }
     <iframe id="textFrame" src="https://www3.cbox.ws/box/?boxid=3553617&boxtag=DNoKe1" width="100%" height="100%" allowtransparency="yes" frameborder="0"></iframe>
     
     <iframe id="voiceFrame" 
-        src="https://vdo.ninja/?room=DAGames_Global_Voice&push&view&chat=1&fileshare=1&autostart&videodevice=0" 
+        src="https://vdo.ninja/?room=DAGames_Global_Voice&push&view&chat=1&fileshare=1&autostart" 
         width="100%" 
         height="100%" 
-        allow="camera; microphone; display-capture; autoplay; clipboard-read; clipboard-write; fullscreen" 
+        allow="camera; microphone; display-capture; autoplay; clipboard-read; clipboard-write" 
         frameborder="0" 
         style="display:none;">
     </iframe>
 </div>
 
 <script>
+  // This helps fix the "AudioContext" error from your logs by refreshing the frame
   function reloadFrames() {
     document.getElementById('textFrame').src = document.getElementById('textFrame').src;
     document.getElementById('voiceFrame').src = document.getElementById('voiceFrame').src;
@@ -150,9 +151,6 @@ body.light-mode .game-card h3 { color:#121212; }
       title.innerText = 'LIVE CHAT';
     }
   }
-
-  // Draggable Logic (Keep your existing dragElement function here)
-  dragElement(document.getElementById("chatContainer"));
 </script>
 </div>
 
