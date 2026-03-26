@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOOM — Play in Browser</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Teko:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --red: #c0392b;
+      --darkred: #7b0000;
+      --orange: #e67e22;
+      --bg: #0a0a0a;
+      --panel: #111;
+      --border: #2a2a2a;
+      --text: #ccc;
+      --mono: 'Share Tech Mono', monospace;
+      --display: 'Teko', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    header {
+      width: 100%;
+      max-width: 900px;
+      padding: 28px 20px 10px;
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: var(--display);
+      font-size: 72px;
+      line-height: 1;
+      color: var(--red);
+      letter-spacing: 4px;
+      text-shadow:
+        2px 2px 0 var(--darkred),
+        4px 4px 0 #3a0000,
+        0 0 40px rgba(192,57,43,0.4);
+    }
+
+    .logo span {
+      color: var(--orange);
+    }
+
+    .tagline {
+      font-size: 11px;
+      color: #555;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding-bottom: 6px;
+    }
+
+    .game-wrapper {
+      width: 100%;
+      max-width: 900px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .screen-container {
+      position: relative;
+      background: #000;
+      border: 1px solid var(--border);
+      box-shadow:
+        0 0 0 1px #1a1a1a,
+        0 0 60px rgba(192,57,43,0.1),
+        inset 0 0 30px rgba(0,0,0,0.8);
+    }
+
+    /* CRT vignette */
+    .screen-container::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.6) 100%);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    #dos-canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16/10;
+      image-rendering: pixelated;
+    }
+
+    /* Loading / splash state */
+    #splash {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      z-index: 5;
+      gap: 24px;
+    }
+
+    #splash .big-skull {
+      font-size: 64px;
+      line-height: 1;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.95); }
+    }
+
+    #splash p {
+      font-size: 12px;
+      color: #444;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    #start-btn {
+      background: var(--red);
+      color: #fff;
+      border: none;
+      font-family: var(--display);
+      font-size: 28px;
+      letter-spacing: 4px;
+      padding: 10px 40px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: background 0.15s, transform 0.1s;
+      clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    }
+
+    #start-btn:hover {
+      background: var(--orange);
+      transform: scale(1.04);
+    }
+
+    #start-btn:active {
+      transform: scale(0.97);
+    }
+
+    /* Status bar */
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 10px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      color: #444;
+      letter-spacing: 1px;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #333;
+      margin-right: 6px;
+      transition: background 0.3s;
+    }
+
+    .status-dot.active {
+      background: #27ae60;
+      box-shadow: 0 0 6px #27ae60;
+    }
+
+    .controls-hint {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+      font-size: 11px;
+    }
+
+    .controls-hint .key {
+      color: var(--orange);
+    }
+
+    .controls-hint .row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .notice {
+      font-size: 10px;
+      color: #333;
+      text-align: center;
+      padding: 10px 0 20px;
+      letter-spacing: 1px;
+    }
+
+    /* Loading bar shown during emulator init */
+    #loading-bar-wrap {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #loading-bar-wrap.visible {
+      display: flex;
+    }
+
+    #loading-bar {
+      width: 200px;
+      height: 4px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      overflow: hidden;
+    }
+
+    #loading-bar-fill {
+      height: 100%;
+      background: var(--red);
+      width: 0%;
+      transition: width 0.3s;
+      box-shadow: 0 0 8px var(--red);
+    }
+
+    #loading-text {
+      font-size: 11px;
+      color: #444;
+      letter-spacing: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">D<span>OO</span>M</div>
+    <div class="tagline">Shareware — Episode I: Knee-Deep in the Dead</div>
+  </header>
+
+  <div class="game-wrapper">
+
+    <div class="screen-container">
+      <canvas id="dos-canvas"></canvas>
+
+      <div id="splash">
+        <div class="big-skull">💀</div>
+        <div id="loading-bar-wrap">
+          <div id="loading-bar"><div id="loading-bar-fill"></div></div>
+          <div id="loading-text">LOADING...</div>
+        </div>
+        <button id="start-btn" onclick="startDoom()">RIP AND TEAR</button>
+        <p>doom1.jsdos required in same folder</p>
+      </div>
+    </div>
+
+    <div class="status-bar">
+      <div><span class="status-dot" id="status-dot"></span><span id="status-text">READY</span></div>
+      <div>DOSBox via js-dos v6</div>
+      <div>640×400</div>
+    </div>
+
+    <div class="controls-hint">
+      <div class="row"><span class="key">Arrow Keys</span> — Move / Turn</div>
+      <div class="row"><span class="key">Ctrl</span> — Shoot</div>
+      <div class="row"><span class="key">Space</span> — Open doors / Activate</div>
+      <div class="row"><span class="key">Shift</span> — Run</div>
+      <div class="row"><span class="key">Alt + Arrow</span> — Strafe</div>
+      <div class="row"><span class="key">1–7</span> — Switch weapon</div>
+      <div class="row"><span class="key">Tab</span> — Automap</div>
+      <div class="row"><span class="key">Esc</span> — Menu</div>
+    </div>
+
+  </div>
+
+  <div class="notice">DOOM © 1993 id Software. Shareware version free to distribute.</div>
+
+  <!-- js-dos v6 -->
+  <script src="https://js-dos.com/6.22/current/js-dos.js"></script>
+
+  <script>
+    var dosInstance = null;
+
+    function setStatus(text, active) {
+      document.getElementById('status-text').textContent = text;
+      var dot = document.getElementById('status-dot');
+      if (active) dot.classList.add('active');
+      else dot.classList.remove('active');
+    }
+
+    function startDoom() {
+      var btn = document.getElementById('start-btn');
+      var splash = document.getElementById('splash');
+      var loadingWrap = document.getElementById('loading-bar-wrap');
+      var loadingFill = document.getElementById('loading-bar-fill');
+      var loadingText = document.getElementById('loading-text');
+
+      btn.style.display = 'none';
+      loadingWrap.classList.add('visible');
+      setStatus('LOADING...', false);
+
+      // Animate loading bar indeterminately while js-dos fetches the bundle
+      var progress = 0;
+      var fakeProgress = setInterval(function() {
+        progress = Math.min(progress + Math.random() * 4, 90);
+        loadingFill.style.width = progress + '%';
+      }, 200);
+
+      Dos(document.getElementById('dos-canvas'), {
+        wdosboxUrl: 'https://js-dos.com/6.22/current/wdosbox.js'
+      }).ready(function(fs, main) {
+        fs.extract('doom.jsdos').then(function() {
+          clearInterval(fakeProgress);
+          loadingFill.style.width = '100%';
+          loadingText.textContent = 'STARTING...';
+
+          setTimeout(function() {
+            splash.style.display = 'none';
+            setStatus('RUNNING', true);
+          }, 400);
+
+          main(['-conf', 'dosbox.conf']);
+        }).catch(function(e) {
+          clearInterval(fakeProgress);
+          loadingText.textContent = 'ERROR: doom.jsdos not found';
+          loadingFill.style.background = '#c0392b';
+          setStatus('ERROR', false);
+          console.error(e);
+        });
+      });
+    }
+  </script>
+
+</body>
+</html>
